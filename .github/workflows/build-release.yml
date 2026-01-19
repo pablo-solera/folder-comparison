@@ -1,53 +1,75 @@
-name: Build and Release
+name: Build Windows EXE and Release
 
 on:
   push:
     tags:
-      - 'v*'  # Se activa cuando se crea un tag que empiece con 'v' (ej: v1.0.0)
-  workflow_dispatch:  # Permite ejecutar manualmente desde GitHub
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  build:
-    runs-on: windows-latest  # Usamos Windows para generar el .exe
+  build-windows:
+    runs-on: windows-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-    - name: Checkout código
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-    - name: Configurar Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
 
-    - name: Instalar dependencias
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller
-        pip install tkinterdnd2
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
 
-    - name: Construir ejecutable con PyInstaller
-      run: |
-        pyinstaller --onefile --windowed --name "ComparadorCarpetas" --icon=icon.ico main.py
+      - name: Verificar versión de PyInstaller
+        run: pyinstaller --version
 
-    - name: Crear archivo ZIP
-      run: |
-        Compress-Archive -Path dist\ComparadorCarpetas.exe -DestinationPath ComparadorCarpetas-Windows.zip
+      - name: Construir ejecutable con PyInstaller
+        run: |
+          pyinstaller --onefile --noconsole --windowed --name "ComparadorCarpetas" --icon=img/icon.ico main.py
 
-    - name: Subir artefacto
-      uses: actions/upload-artifact@v4
-      with:
-        name: ComparadorCarpetas-Windows
-        path: ComparadorCarpetas-Windows.zip
+      - name: Verificar ejecutable generado
+        run: |
+          dir dist
+          if (Test-Path "dist\ComparadorCarpetas.exe") {
+            Write-Host "✓ Ejecutable generado correctamente"
+            $size = (Get-Item "dist\ComparadorCarpetas.exe").Length / 1MB
+            Write-Host "Tamaño: $([math]::Round($size, 2)) MB"
+          } else {
+            Write-Error "✗ Error: No se generó el ejecutable"
+            exit 1
+          }
 
-    - name: Crear Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          ComparadorCarpetas-Windows.zip
-          dist/ComparadorCarpetas.exe
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Crear archivo ZIP
+        run: |
+          Compress-Archive -Path dist\ComparadorCarpetas.exe -DestinationPath ComparadorCarpetas-${{ github.ref_name }}.zip
+
+      - name: Subir artefacto
+        uses: actions/upload-artifact@v6
+        with:
+          name: ComparadorCarpetas-${{ github.ref_name }}
+          path: ComparadorCarpetas-${{ github.ref_name }}.zip
+          retention-days: 90  # Mantener artefactos por 90 días
+
+      - name: Crear Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ComparadorCarpetas-${{ github.ref_name }}.zip
+            dist/ComparadorCarpetas.exe
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          name: Release ${{ github.ref_name }}
