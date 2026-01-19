@@ -37,7 +37,7 @@ jobs:
 
       - name: Construir ejecutable con PyInstaller
         run: |
-          pyinstaller --onefile --noconsole --windowed --name "ComparadorCarpetas" --icon=img/icon.ico main.py
+          pyinstaller --onefile --noconsole --windowed --name "ComparadorCarpetas" --icon=img/icon.ico src/main.py
 
       - name: Verificar ejecutable generado
         run: |
