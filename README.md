@@ -1,6 +1,6 @@
 # 📁 Comparador de Carpetas
 
-![img.png](img/uiImage.png)
+![img.png](resources/img/uiImage.png)
 
 Una aplicación de escritorio moderna y profesional para comparar carpetas y copiar archivos nuevos automáticamente.
 
@@ -22,7 +22,7 @@ Una aplicación de escritorio moderna y profesional para comparar carpetas y cop
 
 ### Opción 1: Ejecutable (Windows)
 
-1. Ve a la sección [Releases](https://github.com/tu-usuario/comparador-carpetas/releases)
+1. Ve a la sección [Releases](https://github.com/pablo-solera/folder-comparison/releases)
 2. Descarga `ComparadorCarpetas-Windows.zip`
 3. Extrae el archivo ZIP
 4. Ejecuta `ComparadorCarpetas.exe`
@@ -43,14 +43,28 @@ git clone https://github.com/tu-usuario/comparador-carpetas.git
 cd comparador-carpetas
 ```
 
-2. Instala las dependencias:
+2. Crear venv:
 ```bash
-pip install tkinterdnd2
+python -m venv venv
+```
+
+3. Activar venv:
+```bash
+# Activar (Windows)
+venv\Scripts\activate
+
+# Activar (Mac/Linux)
+source venv/bin/activate
+```
+
+3. Instala las dependencias:
+```bash
+pip install ".[dev]"
 ```
 
 3. Ejecuta la aplicación:
 ```bash
-python src/main.py
+python -m folder_comparison
 ```
 
 ## 🚀 Uso

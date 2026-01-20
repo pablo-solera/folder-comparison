@@ -3,13 +3,20 @@ name: Build Windows EXE and Release
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión a construir'
+        required: false
+        default: 'dev'
+
 
 permissions:
   contents: write
 
 jobs:
+
   build-windows:
     runs-on: windows-latest
 
@@ -29,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -e ".[build]"
           pip install pyinstaller
 
       - name: Verificar versión de PyInstaller
@@ -37,7 +44,7 @@ jobs:
 
       - name: Construir ejecutable con PyInstaller
         run: |
-          pyinstaller --onefile --noconsole --windowed --name "ComparadorCarpetas" --icon=img/icon.ico src/main.py
+          pyinstaller --onefile --noconsole --windowed --name "ComparadorCarpetas" --icon=resources/img/icon.ico --add-data "resources;resources" src/folder_comparison/__main__.py
 
       - name: Verificar ejecutable generado
         run: |
@@ -50,6 +57,11 @@ jobs:
             Write-Error "✗ Error: No se generó el ejecutable"
             exit 1
           }
+
+      - name: Ejecutar test smoke
+        run: |
+          ./dist/ComparadorCarpetas.exe --version
+        continue-on-error: true
 
       - name: Crear archivo ZIP
         run: |

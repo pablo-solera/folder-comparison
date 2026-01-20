@@ -3,11 +3,13 @@ import os
 import shutil
 from datetime import datetime
 
-class ComparadorCarpetas:
+
+class FolderComparator:
     """
     Clase encargada de comparar carpetas y copiar archivos nuevos.
     Totalmente independiente de UI.
     """
+
     def __init__(self, carpeta_base, carpeta_comparar, carpeta_destino):
         self.carpeta_base = carpeta_base
         self.carpeta_comparar = carpeta_comparar
@@ -17,7 +19,9 @@ class ComparadorCarpetas:
 
     def validar_carpetas(self):
         """Verifica que todas las carpetas existan."""
-        return all(map(os.path.isdir, [self.carpeta_base, self.carpeta_comparar, self.carpeta_destino]))
+        return all(
+            map(os.path.isdir, [self.carpeta_base, self.carpeta_comparar, self.carpeta_destino])
+        )
 
     def generar_destino(self):
         """Genera la carpeta destino con nombre basado en la fecha y la carpeta comparada."""
